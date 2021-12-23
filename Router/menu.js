@@ -3,8 +3,7 @@ const auth = require("../Middleware/auth");
 const express = require("express");
 const router = express.Router();
 const upload = require("../Middleware/multer");
-const fs = require("fs")
-
+const fs = require("fs");
 
 //@GET API:
 router.get("/", async (req, res) => {
@@ -49,7 +48,7 @@ router.put("/:id", upload.single("image"), [reqData], async (req, res) => {
     const keyId = req.params.id;
     // get avatar in file
     const image = req.file ? req.file.path : "uploads\\default.png";
-   
+
     const newData = {
       ...reqBody,
       image,
@@ -60,12 +59,16 @@ router.put("/:id", upload.single("image"), [reqData], async (req, res) => {
 
     if (!getdata) return res.send("not found data");
 
-    const dataUpdated = await Model.findByIdAndUpdate(keyId, {
-      $set: newData,
-    }, {new:true},);
+    const dataUpdated = await Model.findByIdAndUpdate(
+      keyId,
+      {
+        $set: newData,
+      },
+      { new: true }
+    );
 
-     // delete old image. if is not equal default.
-     if (getdata.image !== "uploads\\default.png") {
+    // delete old image. if is not equal default.
+    if (getdata.image !== "uploads\\default.png") {
       fs.unlink(getdata.image, function (err) {
         if (err) return console.log(err);
 

@@ -8,7 +8,7 @@ router.get("/", async (req, res) => {
   try {
     const datas = await Model.find();
     res.send(datas);
-
+    
   } catch (ex) {
     res.send(ex);
     console.log(ex);
@@ -34,7 +34,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-//@PUT API: of like --> api/post/like
+//@PUT API: 
 router.put("/:id", async (req, res) => {
   try {
     const keyId = req.params.id;
@@ -48,12 +48,17 @@ router.put("/:id", async (req, res) => {
 
     if (!getData) return res.send("not found data");
 
-    const dataUpdated = await Model.findByIdAndUpdate(keyId, {
-      $set: newData,
-    },{new:true});
+    const dataUpdated = await Model
+    .findByIdAndUpdate(
+      keyId,
+      {
+        $set: newData,
+      },
+      { new: true }
+    );
 
     res.send(dataUpdated);
-    
+
   } catch (ex) {
     for (feild in ex.errors) {
       res.status(400).send(ex.errors[feild].message);
