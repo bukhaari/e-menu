@@ -8,7 +8,6 @@ router.get("/", async (req, res) => {
   try {
     const datas = await Model.find();
     res.send(datas);
-    
   } catch (ex) {
     res.send(ex);
     console.log(ex);
@@ -25,7 +24,6 @@ router.post("/", async (req, res) => {
     const newModel = Model(newData);
     const result = await newModel.save();
     res.send(result);
-
   } catch (ex) {
     for (feild in ex.errors) {
       res.status(400).send(ex.errors[feild].message);
@@ -34,7 +32,7 @@ router.post("/", async (req, res) => {
   }
 });
 
-//@PUT API: 
+//@PUT API:
 router.put("/:id", async (req, res) => {
   try {
     const keyId = req.params.id;
@@ -48,8 +46,7 @@ router.put("/:id", async (req, res) => {
 
     if (!getData) return res.send("not found data");
 
-    const dataUpdated = await Model
-    .findByIdAndUpdate(
+    const dataUpdated = await Model.findByIdAndUpdate(
       keyId,
       {
         $set: newData,
@@ -58,7 +55,26 @@ router.put("/:id", async (req, res) => {
     );
 
     res.send(dataUpdated);
+  } catch (ex) {
+    for (feild in ex.errors) {
+      res.status(400).send(ex.errors[feild].message);
+      console.log(ex.errors[feild].message);
+    }
+  }
+});
 
+//@DELETE API:
+router.delete("/:id", async (req, res) => {
+  try {
+    const keyId = req.params.id;
+
+    const getData = await Model.findOne({ _id: keyId });
+
+    if (!getData) return res.send("not found data");
+
+    await Model.deleteOne({ _id: keyId });
+
+    res.send({ message: "deleted", status: true });
   } catch (ex) {
     for (feild in ex.errors) {
       res.status(400).send(ex.errors[feild].message);

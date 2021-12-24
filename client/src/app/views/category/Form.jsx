@@ -3,8 +3,7 @@ import { Container, Grid, IconButton, Icon } from '@mui/material'
 import { makeStyles } from '@mui/styles'
 import PopupDiolog from '../../components/common/PopUpDiolog'
 import BaseFormik from '../../components/common/BaseFormik'
-import BaseField from '../../components/controllers/BaseField'
-import BaseButton from '../../components/controllers/BaseBtn'
+import FormControl from '../../components/controllers/FormControl'
 import * as Yup from 'yup'
 import axios from 'axios'
 import useSwr from 'swr'
@@ -22,25 +21,30 @@ const useStyles = makeStyles((theme) => ({
 
 const breakPoin = { xs: 12, sm: 12 }
 
-function EmployeeForm({ titlePopUp, isNewOrUpdate = {} }) {
+function Form({ titlePopUp, isNewOrUpdate = {} }) {
     const classes = useStyles()
 
-    const url = 'company/'
+   const url = 'category/'
 
     const { data, mutate } = useSwr(url)
+    const { data:company } = useSwr('company/')
 
     const [PopUp, setPopUp] = useState(false)
 
     let [loading, setLoading] = useState(false)
+
+    const companyData = company?.map(d => {
+        return {label:d.name, value:d._id}
+    })
 
     const onSubmit = async (values, formikHelpers) => {
         console.log(values)
 
         if (isNewOrUpdate._id) {
             setLoading(true)
-
             await axios.put(url + isNewOrUpdate._id, values)
             mutate()
+            console.log(values)
             setPopUp(false)
             formikHelpers.resetForm()
             setLoading(false)
@@ -49,7 +53,7 @@ function EmployeeForm({ titlePopUp, isNewOrUpdate = {} }) {
         if (isNewOrUpdate === 'new') {
             setLoading(true)
             await axios.post(url, values)
-            mutate([...data, values], false)
+            mutate()
             formikHelpers.resetForm()
             setLoading(false)
         }
@@ -57,10 +61,12 @@ function EmployeeForm({ titlePopUp, isNewOrUpdate = {} }) {
 
     const validationSchema = Yup.object({
         name: Yup.string().required('Name is required!'),
+        companyId: Yup.string().required('Name is required!'),
     })
 
     const initialValues = {
-        name: isNewOrUpdate._id ? isNewOrUpdate.name : '',
+        name: isNewOrUpdate?._id ? isNewOrUpdate.name : '',
+        companyId: isNewOrUpdate?._id ? isNewOrUpdate?.company?._id : '',
     }
 
     return (
@@ -92,7 +98,7 @@ function EmployeeForm({ titlePopUp, isNewOrUpdate = {} }) {
                 <Container
                     component="main"
                     maxWidth="lg"
-                    style={{ marginTop: 25, marginBottom: 20 }}
+                    // style={{ marginTop: 25, marginBottom: 20 }}
                 >
                     <BaseFormik
                         initialValues={initialValues}
@@ -101,10 +107,23 @@ function EmployeeForm({ titlePopUp, isNewOrUpdate = {} }) {
                     >
                         <Grid container spacing={2}>
                             <Grid item {...breakPoin}>
-                                <BaseField name="name" label="Name" />
+                                <FormControl
+                                    control="field"
+                                    name="name"
+                                    label="Name"
+                                />
                             </Grid>
                             <Grid item {...breakPoin}>
-                                <BaseButton
+                                <FormControl
+                                    control="select"
+                                    label="Select Company"
+                                    name="companyId"
+                                    options={companyData}
+                                />
+                            </Grid>
+                            <Grid item {...breakPoin}>
+                                <FormControl
+                                    control="button"
                                     loading={loading}
                                     label={
                                         isNewOrUpdate._id ? 'Update' : 'Create'
@@ -119,4 +138,4 @@ function EmployeeForm({ titlePopUp, isNewOrUpdate = {} }) {
     )
 }
 
-export default memo(EmployeeForm)
+export default memo(Form)

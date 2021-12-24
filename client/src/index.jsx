@@ -6,15 +6,25 @@ import 'perfect-scrollbar/css/perfect-scrollbar.css'
 import * as serviceWorker from './serviceWorker'
 import { StyledEngineProvider } from '@mui/styled-engine'
 import { CssBaseline } from '@mui/material'
-import '@fortawesome/fontawesome-free/css/all.min.css';
-import 'bootstrap-css-only/css/bootstrap.min.css';
-import 'mdbreact/dist/css/mdb.css';
+import '@fortawesome/fontawesome-free/css/all.min.css'
+import 'bootstrap-css-only/css/bootstrap.min.css'
+import 'mdbreact/dist/css/mdb.css'
+import { SWRConfig } from 'swr'
+import axios from 'axios'
+
+axios.defaults.baseURL = 'http://localhost:5000/api/'
 
 ReactDOM.render(
     <StyledEngineProvider injectFirst>
         <BrowserRouter>
             <CssBaseline />
-            <App />
+            <SWRConfig
+                value={{
+                    fetcher: (url) => axios(url).then((r) => r.data)
+                }}
+            >
+                <App />
+            </SWRConfig>
         </BrowserRouter>
     </StyledEngineProvider>,
     document.getElementById('root')

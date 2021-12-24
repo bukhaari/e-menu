@@ -69,4 +69,24 @@ router.put("/:id", async (req, res) => {
   }
 });
 
+//@DELETE API:
+router.delete("/:id", async (req, res) => {
+  try {
+    const keyId = req.params.id;
+
+    const getData = await Model.findOne({ _id: keyId });
+
+    if (!getData) return res.send("not found data");
+
+    await Model.deleteOne({ _id: keyId });
+
+    res.send({ message: "deleted", status: true });
+  } catch (ex) {
+    for (feild in ex.errors) {
+      res.status(400).send(ex.errors[feild].message);
+      console.log(ex.errors[feild].message);
+    }
+  }
+});
+
 module.exports = router;
