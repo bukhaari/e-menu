@@ -21,6 +21,7 @@ router.get("/", async (req, res) => {
 
 //@POST API:
 router.post("/", upload.single("image"), [reqData], async (req, res) => {
+  console.log(req.file)
   try {
     // get avatar in file
     const image = req.file ? req.file.path : "uploads\\default.png";
@@ -46,18 +47,19 @@ router.post("/", upload.single("image"), [reqData], async (req, res) => {
 router.put("/:id", upload.single("image"), [reqData], async (req, res) => {
   try {
     const keyId = req.params.id;
-    // get avatar in file
-    const image = req.file ? req.file.path : "uploads\\default.png";
-
-    const newData = {
-      ...reqBody,
-      image,
-    };
 
     // get post in db
     const getdata = await Model.findOne({ _id: keyId });
 
     if (!getdata) return res.send("not found data");
+
+    // get avatar in file
+    const image = req.file ? req.file.path : getdata.image
+
+    const newData = {
+      ...reqBody,
+      image,
+    };
 
     const dataUpdated = await Model.findByIdAndUpdate(
       keyId,
@@ -68,7 +70,7 @@ router.put("/:id", upload.single("image"), [reqData], async (req, res) => {
     );
 
     // delete old image. if is not equal default.
-    if (getdata.image !== "uploads\\default.png") {
+    if (getdata.image !== "uploads\\default.png" && req.file) {
       fs.unlink(getdata.image, function (err) {
         if (err) return console.log(err);
 
@@ -111,11 +113,11 @@ function reqData(req, res, next) {
   try {
     reqBody = {
       name: req.body.name,
-      available: req.body.available,
       category: req.body.categoryId,
-      bestSeller: req.body.bestSeller,
-      price: parseFloat(req.body.price),
+      price: parseInt(req.body.price),
       description: req.body.description,
+      available: JSON.parse(req.body.available.toLowerCase()),
+      bestSeller: JSON.parse(req.body.bestSeller.toLowerCase()),
     };
 
     next();

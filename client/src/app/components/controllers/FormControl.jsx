@@ -1,6 +1,7 @@
 import BaseField from "./BaseField";
 import BaseBtn from "./BaseBtn";
 import BaseSelect from "./BaseSelect";
+import BaseFile from './BaseFile';
 
 function FormControls({ control, ...rest }) {
   switch (control) {
@@ -10,6 +11,8 @@ function FormControls({ control, ...rest }) {
           return <BaseBtn {...rest} />
       case 'select':
           return <BaseSelect {...rest} />
+      case 'file':
+          return <BaseFile {...rest} />
       default:
           return null
   }

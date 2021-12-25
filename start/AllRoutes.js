@@ -19,11 +19,6 @@ function allRoutes(app) {
   app.use("/api/login", Login);
   app.use("/api/company", company);
   app.use("/api/category", category);
-
-  //main route
-  app.get("/", (req, res) => {
-    res.send("Welcome to Project");
-  });
 }
 
 module.exports = allRoutes;

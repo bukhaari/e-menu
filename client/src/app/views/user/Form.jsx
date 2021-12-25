@@ -8,6 +8,7 @@ import * as Yup from 'yup'
 import axios from 'axios'
 import useSwr from 'swr'
 import AddIcon from '@mui/icons-material/Add'
+
 const useStyles = makeStyles((theme) => ({
     button: {
         float: 'right',
@@ -20,18 +21,13 @@ const breakPoin = { xs: 12, sm: 6 }
 function Form({ titlePopUp, isNewOrUpdate = {} }) {
     const classes = useStyles()
 
-    const url = 'menu/'
+    const url = 'user/'
 
     const { mutate } = useSwr(url)
-    const { data: category } = useSwr('category/')
 
     const [PopUp, setPopUp] = useState(false)
 
     let [loading, setLoading] = useState(false)
-
-    const categoryData = category?.map((d) => {
-        return { label: d.name, value: d._id }
-    })
 
     const boleanData = [
         { label: 'True', value: 'true' },
@@ -39,24 +35,10 @@ function Form({ titlePopUp, isNewOrUpdate = {} }) {
     ]
 
     const onSubmit = async (values, formikHelpers) => {
-        if (isNewOrUpdate?._id && values.image === '') {
-            values.image = isNewOrUpdate.image
-        }        
-        
-        const formData = new FormData()
-
-        formData.append('image', values.image)
-        formData.append('name', values.name)
-        formData.append('price', values.price)
-        formData.append('available', values.available)
-        formData.append('bestSeller', values.bestSeller)
-        formData.append('description', values.description)
-        formData.append('categoryId', values.categoryId)
-
         try {
             if (isNewOrUpdate._id) {
                 setLoading(true)
-                await axios.put(url + isNewOrUpdate._id, formData, )
+                await axios.put(url + isNewOrUpdate._id, values)
                 mutate()
                 setPopUp(false)
                 formikHelpers.resetForm()
@@ -65,7 +47,7 @@ function Form({ titlePopUp, isNewOrUpdate = {} }) {
 
             if (isNewOrUpdate === 'new') {
                 setLoading(true)
-                await axios.post(url, formData)
+                await axios.post(url, values)
 
                 mutate()
                 formikHelpers.resetForm()
@@ -79,37 +61,25 @@ function Form({ titlePopUp, isNewOrUpdate = {} }) {
 
     const validationSchema = Yup.object({
         name: Yup.string().required('Name is required!'),
-        categoryId: Yup.string().required('Name is required!'),
     })
 
     const initialValues = {
         name: isNewOrUpdate?._id ? isNewOrUpdate.name : '',
-        price: isNewOrUpdate?._id ? isNewOrUpdate.price : '',
-        available: isNewOrUpdate?._id
-            ? isNewOrUpdate.available
+        email: isNewOrUpdate?._id ? isNewOrUpdate.email : '',
+        webUrl: isNewOrUpdate?._id ? isNewOrUpdate.webUrl : '',
+        password: isNewOrUpdate?._id ? isNewOrUpdate.password : '',
+        isAdmin: isNewOrUpdate?._id
+            ? isNewOrUpdate.isAdmin
                 ? 'true'
                 : 'false'
             : '',
-        bestSeller: isNewOrUpdate?._id
-            ? isNewOrUpdate.bestSeller
-                ? 'true'
-                : 'false'
-            : '',
-        description: isNewOrUpdate?._id ? isNewOrUpdate.description : '',
-        categoryId: isNewOrUpdate?._id ? isNewOrUpdate?.category?._id : '',
-        image: '',
     }
 
     return (
         <>
             {isNewOrUpdate !== 'new' ? (
                 <IconButton size={'small'} onClick={() => setPopUp(true)}>
-                    <Icon
-                    // color="inherit"
-                    // style={{ color: '#d72323' }}
-                    >
-                        edit
-                    </Icon>
+                    <Icon>edit</Icon>
                 </IconButton>
             ) : (
                 <IconButton
@@ -143,49 +113,33 @@ function Form({ titlePopUp, isNewOrUpdate = {} }) {
                             <Grid item {...breakPoin}>
                                 <FormControl
                                     control="field"
-                                    name="price"
-                                    label="Price"
-                                />
-                            </Grid>
-                            <Grid item {...breakPoin}>
-                                <FormControl
-                                    control="select"
-                                    label="is an available"
-                                    name="available"
-                                    options={boleanData}
-                                />
-                            </Grid>
-                            <Grid item {...breakPoin}>
-                                <FormControl
-                                    control="select"
-                                    label="is a bestSeller"
-                                    name="bestSeller"
-                                    options={boleanData}
-                                />
-                            </Grid>
-                            <Grid item {...breakPoin}>
-                                <FormControl
-                                    control="select"
-                                    label="Select Category"
-                                    name="categoryId"
-                                    options={categoryData}
+                                    name="email"
+                                    label="Email"
                                 />
                             </Grid>
                             <Grid item {...breakPoin}>
                                 <FormControl
                                     control="field"
-                                    label="Description"
-                                    name="description"
+                                    type="password"
+                                    name="password"
+                                    label="Password"
                                 />
                             </Grid>
                             <Grid item {...breakPoin}>
                                 <FormControl
-                                    control="file"
-                                    topLabel="Image"
-                                    name="image"
+                                    control="select"
+                                    name="isAdmin"
+                                    label="is an admin"
+                                    options={boleanData}
                                 />
                             </Grid>
-
+                            <Grid item {...breakPoin}>
+                                <FormControl
+                                    control="field"
+                                    name="webUrl"
+                                    label="Web Url"
+                                />
+                            </Grid>
                             <Grid item xs={12}>
                                 <FormControl
                                     control="button"

@@ -18,9 +18,9 @@ const IconStyle = styled(Icon)(() => ({
 }))
 
 export default function Menu() {
-    const url = 'company/'
-
-    const { data, mutate } = useSwr(url, { initialData: [] })
+    const url = 'menu/'
+    
+    const { data, mutate } = useSwr(url,{initialData:[]})
 
     const handleDlete = async (id) => {
         await axios.delete(url + id)
@@ -36,14 +36,38 @@ export default function Menu() {
                 // width: 150,
             },
             {
-                label: 'Date',
-                field: 'date',
+                label: 'Category',
+                field: 'categoryName',
                 sort: 'asc',
-                // width: 70,
+                // width: 150,
             },
             {
-                label: 'Time',
-                field: 'time',
+                label: 'Price',
+                field: 'priceCustom',
+                sort: 'asc',
+                // width: 150,
+            },
+            {
+                label: 'Description',
+                field: 'description',
+                sort: 'asc',
+                // width: 150,
+            },
+            {
+                label: 'Available',
+                field: 'availableCustome',
+                sort: 'asc',
+                // width: 150,
+            },
+            {
+                label: 'Best Seller',
+                field: 'bestSellerCustom',
+                sort: 'asc',
+                // width: 150,
+            },
+            {
+                label: 'Date',
+                field: 'date',
                 sort: 'asc',
                 // width: 70,
             },
@@ -58,7 +82,7 @@ export default function Menu() {
             const data = { ...row }
             row.action = (
                 <>
-                    <BtnForm titlePopUp="Company form" isNewOrUpdate={data} />
+                    <BtnForm titlePopUp="Menu form" isNewOrUpdate={data} />
 
                     <IconButton
                         size={'small'}
@@ -68,8 +92,11 @@ export default function Menu() {
                     </IconButton>
                 </>
             )
-            row.time = new Date(data.createdAt).toLocaleTimeString()
             row.date = new Date(data.createdAt).toDateString()
+            row.categoryName = row.category?.name
+            row.priceCustom = '$' + row.price
+            row.availableCustome = row.available ? 'Yes' : 'No'
+            row.bestSellerCustom = row.bestSeller ? 'Yes' : 'No'
             return row
         }),
     }
@@ -80,7 +107,7 @@ export default function Menu() {
                 <Grid container spacing={2}>
                     <Grid item xs={12}>
                         <BtnForm
-                            titlePopUp="Company form"
+                            titlePopUp="Menu form"
                             isNewOrUpdate="new"
                         />
                     </Grid>
@@ -92,3 +119,4 @@ export default function Menu() {
         </Main>
     )
 }
+

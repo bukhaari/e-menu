@@ -1,44 +1,53 @@
-const User = require("../Models/user");
+const { Model, schema } = require("../Models/user");
 const express = require("express");
 const bcrypt = require("bcrypt");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
-const upload = require("../Middleware/multer")
+const upload = require("../Middleware/multer");
 
 //Getting secretkey in env
 const SecretKey = process.env.SecretKey;
 
-router.post("/", upload.single("avatar"), async (req, res) => {
+//@GET API:
+router.get("/", async (req, res) => {
+  try {
+    const datas = await Model.find();
+    res.send(datas);
+  } catch (ex) {
+    res.send(ex);
+    console.log(ex);
+  }
+});
+
+router.post("/", async (req, res) => {
   try {
     // destructuring req.boy object
-    const { email, name, password, isAdmin, webUrl } = req.body;
+    const { name, email, password, isAdmin, webUrl } = req.body;
 
     // looking on database this user is already exist?
-    const getUser = await User.findOne({ email: email });
+    const getUser = await Model.findOne({ email: email });
 
     // checking user is Already
     if (getUser) return res.status(400).send("user is Already registred");
-
-    // get avatar in file
-    const avatar = req.file ? req.file.path : "uploads\\default.png";
 
     // new data from req.body object destructuring
     let newUser = {
       name,
       email,
-      password, 
-      avatar,
+      password,
       isAdmin,
       webUrl,
     };
 
+
     // generate salt
-    const salt = await bcrypt.genSalt(10);
+    // const salt = await bcrypt.genSalt(10);
+    // console.log("salt");
     //hashing password and update newuser object
-    newUser.password = await bcrypt.hash(password, salt);
+    // newUser.password = await bcrypt.hash(newUser.password, salt);
 
     //schema user
-    const user = new User(newUser);
+    const user = new Model(newUser);
 
     // saving new user
     const result = await user.save();
@@ -61,43 +70,55 @@ router.post("/", upload.single("avatar"), async (req, res) => {
   }
 });
 
-router.put("/:id", upload.single("avatar"), async (req, res) => {
+router.put("/:id",  async (req, res) => {
   try {
+    const keyId = req.params.id;
+
     // lookin this user is already in db.
-    const getUser = await User.findById(req.params.id);
+    const getUser = await Model.findOne({ _id: keyId });
 
     //checking is already
     if (!getUser) return res.status(404).send("Data was not found");
 
-    // get avatar in file. check the file has path.
-    const avatar = req.file ? req.file.path : "uploads\\default.png";
-
-    // prepare object of up data data.
-    const newData = { ...req.body, avatar };
-
-    // delete old image. if is not equal default.
-    if (getUser.avatar !== "uploads\\default.png") {
-      fs.unlink(getUser.avatar, function (err) {
-        if (err) return console.log(err);
-
-        // if no error, file has been deleted successfully
-        console.log("File deleted!");
-      });
-    }
-
-    const result = await User.findOneAndUpdate(
-      { _id: req.params.id },
+    const result = await Model.findOneAndUpdate(
+      { _id: keyId },
       {
-        $set: newData,
+        $set: req.body,
       },
       {
         new: true,
       }
     );
 
-    res.send(result);
+    //cloning new result user and delete password
+    let sendData = { ...result._doc };
+    delete sendData.password;
+    delete sendData.__v;
+
+    res.send(sendData);
   } catch (ex) {
     for (feild in ex.errors) res.status(400).json(ex.errors[feild].message);
+  }
+});
+
+
+//@DELETE API:
+router.delete("/:id", async (req, res) => {
+  try {
+    const keyId = req.params.id;
+
+    const getData = await Model.findOne({ _id: keyId });
+
+    if (!getData) return res.send("not found data");
+
+    await Model.deleteOne({ _id: keyId });
+
+    res.send({ message: "deleted", status: true });
+  } catch (ex) {
+    for (feild in ex.errors) {
+      res.status(400).send(ex.errors[feild].message);
+      console.log(ex.errors[feild].message);
+    }
   }
 });
 
